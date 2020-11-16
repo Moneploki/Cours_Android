@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Clement Beschu Simulator 2K21</string>
+    <string name="home_btn">bonjour ESEO</string>
+    <string name="toast_txt">toast pour clement beschu</string>
+    <string name="txt_toast_button">toast pour clement beschu du boutton</string>
+    <string name="linkdin_clement">Linkdin Clément</string>
+</resources>
