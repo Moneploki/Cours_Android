@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.example.testcours.ui.MainActivity
 
 class SplashActivity : AppCompatActivity() {
 
