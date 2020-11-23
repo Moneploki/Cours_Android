@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -33,6 +34,10 @@ class MainActivity : AppCompatActivity() {
         }
         image_clement_mignon.setOnClickListener {
             startActivity(RecyclerView.getStartIntent(this));
+        }
+        MaterialDialog(this).show {
+            title(text="testtttttt")
+            message(text="tessst message ")
         }
     }
 
