@@ -2,14 +2,14 @@ package com.example.testcours.ui
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.recyclical.datasource.dataSourceTypedOf
 import com.afollestad.recyclical.setup
 import com.afollestad.recyclical.withItem
 import com.example.testcours.R
-import com.example.testcours.StringViewHolder
+import com.example.testcours.data.StringViewHolder
 import kotlinx.android.synthetic.main.activity_recycler_view.*
 
 class RecyclerView : AppCompatActivity() {
