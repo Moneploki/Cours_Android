@@ -10,4 +10,6 @@
     <string name="start_scan">Start Scan</string>
     <string name="disconnection">Déconnexion</string>
     <string name="toggleLED">TOGGLE LED</string>
+    <string name="uuid_not_found">g pa trouvé le uuid</string>
+    <string name="not_connected">g sui pa connect</string>
 </resources>

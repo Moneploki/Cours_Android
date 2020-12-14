@@ -1,3 +1,5 @@
+package com.example.testcours.data.manager
+
 import android.bluetooth.*
 import java.util.*
 

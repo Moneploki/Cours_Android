@@ -1,10 +1,11 @@
 package com.example.testcours.ui
 
-import BluetoothLEManager
 import Device
+import LocalPreferences
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.content.Context
@@ -14,6 +15,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.ParcelUuid
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
@@ -25,6 +27,7 @@ import com.afollestad.recyclical.setup
 import com.afollestad.recyclical.withItem
 import com.example.testcours.R
 import com.example.testcours.data.DeviceViewHolder
+import com.example.testcours.data.manager.BluetoothLEManager
 import kotlinx.android.synthetic.main.activity_b_l_e_.*
 
 class BLE_Activity : AppCompatActivity() {
@@ -58,7 +61,7 @@ class BLE_Activity : AppCompatActivity() {
 
     // On ne retourne que les « Devices » proposant le bon UUID
     private var scanFilters: List<ScanFilter> = arrayListOf(
-//        ScanFilter.Builder().setServiceUuid(ParcelUuid(BluetoothLEManager.DEVICE_UUID)).build()
+        ScanFilter.Builder().setServiceUuid(ParcelUuid(BluetoothLEManager.DEVICE_UUID)).build()
     )
 
     // Variable de fonctionnement
@@ -98,6 +101,12 @@ class BLE_Activity : AppCompatActivity() {
                 setupBLE()
             }
 
+        }
+        toggleLed.setOnClickListener {
+            toggleLed()
+        }
+        disconnect.setOnClickListener {
+            disconnectFromCurrentDevice()
         }
     }
 
@@ -234,7 +243,7 @@ class BLE_Activity : AppCompatActivity() {
 
                             // À IMPLÉMENTER
                             // Vous devez appeler la méthode qui active les notifications BLE
-                            // enableListenBleNotify()
+                            //enableListenBleNotify()
 
                             // On change la vue « pour être en mode connecté »
                             setUiMode(true)
@@ -244,6 +253,8 @@ class BLE_Activity : AppCompatActivity() {
 
                             // À IMPLÉMENTER EN FONCTION DE CE QUE NOUS AVONS DIT ENSEMBLE
                         }
+                        LocalPreferences.getInstance(this).lastConnectedDeviceName(device.name)
+
                     },
                     onNotify = {
                         runOnUiThread {
@@ -284,6 +295,36 @@ class BLE_Activity : AppCompatActivity() {
             currentConnexion.visibility = View.GONE
             disconnect.visibility = View.GONE
             toggleLed.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Récupération de « service » BLE (via UUID) qui nous permettra d'envoyer / recevoir des commandes
+     */
+    private fun getMainDeviceService(): BluetoothGattService? {
+        return currentBluetoothGatt?.let { bleGatt ->
+            val service = bleGatt.getService(BluetoothLEManager.DEVICE_UUID)
+            service?.let {
+                return it
+            } ?: run {
+                Toast.makeText(this, getString(R.string.uuid_not_found), Toast.LENGTH_SHORT).show()
+                return null
+            }
+        } ?: run {
+            Toast.makeText(this, getString(R.string.not_connected), Toast.LENGTH_SHORT).show()
+            return null
+        }
+    }
+
+    /**
+     * On change l'état de la LED (via l'UUID de toggle)
+     */
+    private fun toggleLed() {
+        getMainDeviceService()?.let { service ->
+            val toggleLed =
+                service.getCharacteristic(BluetoothLEManager.CHARACTERISTIC_TOGGLE_LED_UUID)
+            toggleLed.setValue("1")
+            currentBluetoothGatt?.writeCharacteristic(toggleLed)
         }
     }
 
