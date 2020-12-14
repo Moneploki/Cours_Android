@@ -52,5 +52,13 @@
         app:layout_constraintBottom_toTopOf="@id/toggleLed"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageView
+        android:id="@+id/ledStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_flash_off_24"
+        app:layout_constraintBottom_toTopOf="@id/toggleLed"
+        app:layout_constraintEnd_toEndOf="parent"></ImageView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

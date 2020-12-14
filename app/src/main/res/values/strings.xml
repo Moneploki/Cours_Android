@@ -12,4 +12,5 @@
     <string name="toggleLED">TOGGLE LED</string>
     <string name="uuid_not_found">g pa trouvé le uuid</string>
     <string name="not_connected">g sui pa connect</string>
+    <string name="enable_ble_notifications">"les notifs sont al bg "</string>
 </resources>

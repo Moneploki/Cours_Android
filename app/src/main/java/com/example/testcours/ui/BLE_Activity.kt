@@ -3,10 +3,7 @@ package com.example.testcours.ui
 import Device
 import LocalPreferences
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
+import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
@@ -192,7 +189,7 @@ class BLE_Activity : AppCompatActivity() {
     }
 
     // Le scan va durer 10 secondes seulement, sauf si vous passez une autre valeur comme paramètre.
-    private fun scanLeDevice(scanPeriod: Long = 30000) {
+    private fun scanLeDevice(scanPeriod: Long = 3000) {
         if (!mScanning) {
             bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
 
@@ -243,29 +240,43 @@ class BLE_Activity : AppCompatActivity() {
 
                             // À IMPLÉMENTER
                             // Vous devez appeler la méthode qui active les notifications BLE
-                            //enableListenBleNotify()
+                            enableListenBleNotify()
 
                             // On change la vue « pour être en mode connecté »
                             setUiMode(true)
 
                             // On sauvegarde dans les « LocalPréférence » de l'application le nom du dernier préphérique
+                            LocalPreferences.getInstance(this).lastConnectedDeviceName(device.name)
                             // sur lequel nous nous sommes connecté
 
                             // À IMPLÉMENTER EN FONCTION DE CE QUE NOUS AVONS DIT ENSEMBLE
                         }
-                        LocalPreferences.getInstance(this).lastConnectedDeviceName(device.name)
+
 
                     },
                     onNotify = {
                         runOnUiThread {
                             // VOUS DEVEZ APPELER ICI LA MÉTHODE QUI VA GÉRER LE CHANGEMENT D'ÉTAT DE LA LED DANS L'INTERFACE
-                            // handleToggleLedNotificationUpdate(it)
+                            handleToggleLedNotificationUpdate(it)
                         }
                     },
                     onDisconnect = { runOnUiThread { disconnectFromCurrentDevice() } })
             )
         }
     }
+
+    private fun enableListenBleNotify() {
+        getMainDeviceService()?.let { service ->
+            Toast.makeText(this, getString(R.string.enable_ble_notifications), Toast.LENGTH_SHORT)
+                .show()
+            // Indique que le GATT Client va écouter les notifications sur le charactérisque
+            val notification =
+                service.getCharacteristic(BluetoothLEManager.CHARACTERISTIC_NOTIFY_STATE)
+
+            currentBluetoothGatt?.setCharacteristicNotification(notification, true)
+        }
+    }
+
 
     /**
      * On demande la déconnexion du device
@@ -283,6 +294,7 @@ class BLE_Activity : AppCompatActivity() {
             Recycler_BLE.visibility = View.GONE
             startScan.visibility = View.GONE
             currentConnexion.visibility = View.VISIBLE
+            ledStatus.visibility = View.VISIBLE
             currentConnexion.text =
                 getString(R.string.connected_to, BluetoothLEManager.currentDevice?.name)
             disconnect.visibility = View.VISIBLE
@@ -291,7 +303,7 @@ class BLE_Activity : AppCompatActivity() {
             // Non connecté, reset de la vue.
             Recycler_BLE.visibility = View.VISIBLE
             startScan.visibility = View.VISIBLE
-            //ledStatus.visibility = View.GONE
+            ledStatus.visibility = View.GONE
             currentConnexion.visibility = View.GONE
             disconnect.visibility = View.GONE
             toggleLed.visibility = View.GONE
@@ -325,6 +337,18 @@ class BLE_Activity : AppCompatActivity() {
                 service.getCharacteristic(BluetoothLEManager.CHARACTERISTIC_TOGGLE_LED_UUID)
             toggleLed.setValue("1")
             currentBluetoothGatt?.writeCharacteristic(toggleLed)
+        }
+    }
+
+    /**
+     * Méthode appelée à chaque notification du Device, la notification contient le nouvel
+     * état de la led
+     */
+    private fun handleToggleLedNotificationUpdate(characteristic: BluetoothGattCharacteristic) {
+        if (characteristic.getStringValue(0).equals("on", ignoreCase = true)) {
+            ledStatus.setImageResource(R.drawable.ic_baseline_flash_on_24)
+        } else {
+            ledStatus.setImageResource(R.drawable.ic_baseline_flash_off_24)
         }
     }
 
