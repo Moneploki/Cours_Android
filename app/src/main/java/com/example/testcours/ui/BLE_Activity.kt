@@ -3,9 +3,7 @@ package com.example.testcours.ui
 import BluetoothLEManager
 import Device
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothManager
+import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
@@ -14,6 +12,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.ParcelUuid
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
@@ -25,6 +24,7 @@ import com.afollestad.recyclical.setup
 import com.afollestad.recyclical.withItem
 import com.example.testcours.R
 import com.example.testcours.data.DeviceViewHolder
+import com.example.testcours.data.local.LocalPreferences
 import kotlinx.android.synthetic.main.activity_b_l_e_.*
 
 class BLE_Activity : AppCompatActivity() {
@@ -58,7 +58,7 @@ class BLE_Activity : AppCompatActivity() {
 
     // On ne retourne que les « Devices » proposant le bon UUID
     private var scanFilters: List<ScanFilter> = arrayListOf(
-//        ScanFilter.Builder().setServiceUuid(ParcelUuid(BluetoothLEManager.DEVICE_UUID)).build()
+        ScanFilter.Builder().setServiceUuid(ParcelUuid(BluetoothLEManager.DEVICE_UUID)).build()
     )
 
     // Variable de fonctionnement
@@ -88,8 +88,20 @@ class BLE_Activity : AppCompatActivity() {
                     ).show()
                     BluetoothLEManager.currentDevice = item.device
                     connectToCurrentDevice()
+
                 }
             }
+        }
+
+        disconnect.setOnClickListener {
+            // Appeler la bonne méthode
+            disconnectFromCurrentDevice()
+
+        }
+
+        toggleLed.setOnClickListener {
+            // Appeler la bonne méthode
+            toggleLed()
         }
 
         startScan.setOnClickListener {
@@ -219,6 +231,28 @@ class BLE_Activity : AppCompatActivity() {
         }
     }
 
+    private fun enableListenBleNotify() {
+        getMainDeviceService()?.let { service ->
+            Toast.makeText(this, getString(R.string.enable_ble_notifications), Toast.LENGTH_SHORT).show()
+            // Indique que le GATT Client va écouter les notifications sur le charactérisque
+            val notification = service.getCharacteristic(BluetoothLEManager.CHARACTERISTIC_NOTIFY_STATE)
+
+            currentBluetoothGatt?.setCharacteristicNotification(notification, true)
+        }
+    }
+
+    /**
+     * Méthode appelée à chaque notification du Device, la notification contient le nouvel
+     * état de la led
+     */
+    private fun handleToggleLedNotificationUpdate(characteristic: BluetoothGattCharacteristic) {
+        if (characteristic.getStringValue(0).equals("on", ignoreCase = true)) {
+            ledStatus.setImageResource(R.drawable.ic_baseline_flash_on_24)
+        } else {
+            ledStatus.setImageResource(R.drawable.ic_baseline_flash_off_24)
+        }
+    }
+
     private fun connectToCurrentDevice() {
         BluetoothLEManager.currentDevice?.let { device ->
             Toast.makeText(this, "Connexion en cours … $device", Toast.LENGTH_SHORT).show()
@@ -234,7 +268,7 @@ class BLE_Activity : AppCompatActivity() {
 
                             // À IMPLÉMENTER
                             // Vous devez appeler la méthode qui active les notifications BLE
-                            // enableListenBleNotify()
+                            enableListenBleNotify()
 
                             // On change la vue « pour être en mode connecté »
                             setUiMode(true)
@@ -243,18 +277,72 @@ class BLE_Activity : AppCompatActivity() {
                             // sur lequel nous nous sommes connecté
 
                             // À IMPLÉMENTER EN FONCTION DE CE QUE NOUS AVONS DIT ENSEMBLE
+                            LocalPreferences.getInstance(this).lastConnectedDeviceName("MON_DEVICE_SELECTED");
+
                         }
                     },
                     onNotify = {
                         runOnUiThread {
                             // VOUS DEVEZ APPELER ICI LA MÉTHODE QUI VA GÉRER LE CHANGEMENT D'ÉTAT DE LA LED DANS L'INTERFACE
-                            // handleToggleLedNotificationUpdate(it)
+                             handleToggleLedNotificationUpdate(it)
                         }
                     },
                     onDisconnect = { runOnUiThread { disconnectFromCurrentDevice() } })
             )
         }
     }
+
+    /**
+     * Récupération de « service » BLE (via UUID) qui nous permettra d'envoyer / recevoir des commandes
+     */
+    private fun getMainDeviceService(): BluetoothGattService? {
+        return currentBluetoothGatt?.let { bleGatt ->
+            val service = bleGatt.getService(BluetoothLEManager.DEVICE_UUID)
+            service?.let {
+                return it
+            } ?: run {
+                Toast.makeText(this, getString(R.string.uuid_not_found), Toast.LENGTH_SHORT).show()
+                return null;
+            }
+        } ?: run {
+            Toast.makeText(this, getString(R.string.not_connected), Toast.LENGTH_SHORT).show()
+            return null
+        }
+    }
+
+    /**
+     * On change l'état de la LED (via l'UUID de toggle)
+     */
+    private fun toggleLed() {
+        getMainDeviceService()?.let { service ->
+            val toggleLed = service.getCharacteristic(BluetoothLEManager.CHARACTERISTIC_TOGGLE_LED_UUID)
+            toggleLed.setValue("1")
+            currentBluetoothGatt?.writeCharacteristic(toggleLed)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            // Test si le téléphone est compatible BLE, si c'est pas le cas, on finish() l'activity
+            Toast.makeText(this, getString(R.string.not_compatible), Toast.LENGTH_SHORT).show()
+            finish()
+        } else if (hasPermission() && locationServiceEnabled()) {
+            // Lancer suite => Activation BLE + Lancer Scan
+            setupBLE()
+        } else if(!hasPermission()) {
+            // On demande la permission
+            askForPermission()
+        } else {
+            // On demande d'activer la localisation
+            // Idéalement on demande avec un activité.
+            // À vous de me proposer mieux (Une activité, une dialog, etc)
+            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        }
+    }
+
+
 
     /**
      * On demande la déconnexion du device
@@ -271,6 +359,7 @@ class BLE_Activity : AppCompatActivity() {
             bleDevicesFoundList.clear()
             Recycler_BLE.visibility = View.GONE
             startScan.visibility = View.GONE
+            ledStatus.visibility = View.VISIBLE
             currentConnexion.visibility = View.VISIBLE
             currentConnexion.text =
                 getString(R.string.connected_to, BluetoothLEManager.currentDevice?.name)
@@ -280,7 +369,7 @@ class BLE_Activity : AppCompatActivity() {
             // Non connecté, reset de la vue.
             Recycler_BLE.visibility = View.VISIBLE
             startScan.visibility = View.VISIBLE
-            //ledStatus.visibility = View.GONE
+            ledStatus.visibility = View.GONE
             currentConnexion.visibility = View.GONE
             disconnect.visibility = View.GONE
             toggleLed.visibility = View.GONE

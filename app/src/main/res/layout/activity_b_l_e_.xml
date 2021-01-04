@@ -16,6 +16,17 @@
         tools:itemCount="10"
         tools:listitem="@layout/item_list" />
 
+    <ImageView
+        android:id="@+id/ledStatus"
+        android:layout_width="171dp"
+        android:layout_height="151dp"
+        android:layout_marginTop="184dp"
+        android:src="@drawable/ic_baseline_flash_off_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.356"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/startScan"
         android:layout_width="wrap_content"

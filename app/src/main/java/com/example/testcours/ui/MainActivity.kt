@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(BLE_Activity.getStartIntent(this))
         }
         MaterialAlertDialogBuilder(this)
-            .setTitle("question existentiel :")
+            .setTitle("question existentiel :") 
             .setMessage("Aime tu clément Beschu ?")
             .setNeutralButton("non") { dialog, which ->
                 Toast.makeText(this, "Tu pues la merde", Toast.LENGTH_LONG).show()

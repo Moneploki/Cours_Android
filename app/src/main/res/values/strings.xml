@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Clement Beschu Simulator 2K21</string>
+    <string name="app_name">App Clément Beschu</string>
     <string name="home_btn">bonjour ESEO</string>
     <string name="toast_txt">toast pour clement beschu</string>
     <string name="txt_toast_button">toast pour clement beschu du boutton</string>
@@ -10,4 +10,8 @@
     <string name="start_scan">Start Scan</string>
     <string name="disconnection">Déconnexion</string>
     <string name="toggleLED">TOGGLE LED</string>
+    <string name="uuid_not_found">Device name not found</string>
+    <string name="not_connected">Not connected</string>
+    <string name="not_compatible">Not compatible</string>
+    <string name="enable_ble_notifications">Enable ble notifications</string>
 </resources>
