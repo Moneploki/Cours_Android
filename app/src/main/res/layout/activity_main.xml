@@ -31,17 +31,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
+
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/clement_image"
+        android:layout_width="166dp"
+        android:layout_height="173dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/puissance"
-        app:layout_constraintTop_toBottomOf="@id/button_test"
+        app:layout_constraintEnd_toEndOf="@id/thomas_image"
+        app:layout_constraintHorizontal_bias="0.085"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_test" />
+
+    <ImageView
+        android:id="@+id/thomas_image"
+        android:layout_width="166dp"
+        android:layout_height="173dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/thomas_mignon"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="10px"
-        android:layout_marginBottom="10px"
-        />
+        app:layout_constraintHorizontal_bias="0.869"
+        app:layout_constraintStart_toEndOf="@id/clement_image"
+        app:layout_constraintTop_toBottomOf="@id/button_test" />
+
     <ImageView
         android:id="@+id/image_settings"
         android:layout_width="wrap_content"

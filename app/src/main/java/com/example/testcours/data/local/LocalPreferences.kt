@@ -15,6 +15,7 @@ class LocalPreferences private constructor(context: Context) {
         return sharedPreferences.getString("selectedDevice", null)
     }
 
+
     companion object {
         private var INSTANCE: LocalPreferences? = null
 

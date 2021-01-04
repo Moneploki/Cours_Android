@@ -43,6 +43,9 @@ class MainActivity : AppCompatActivity() {
         clement_image.setOnClickListener {
             startActivity(BLE_Activity.getStartIntent(this))
         }
+        thomas_image.setOnClickListener {
+            startActivity(ActionActivity.getStartIntent(this, "zagazk"))
+        }
         MaterialAlertDialogBuilder(this)
             .setTitle("question existentiel :") 
             .setMessage("Aime tu clément Beschu ?")

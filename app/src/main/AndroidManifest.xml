@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launche_tesla_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.BLE_Activity"></activity>
+        <activity android:name=".ui.ActionActivity"></activity>
+        <activity android:name=".ui.BLE_Activity" />
         <activity android:name=".ui.RecyclerView" />
         <activity
             android:name=".SplashActivity"
